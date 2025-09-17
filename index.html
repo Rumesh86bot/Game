@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Security Game</title>
+  <style>
+    #board {
+      background: url('Background.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      width: 100%;
+      max-width: 900px;
+      height: auto;
+      aspect-ratio: 13 / 7;
+      border: 1px solid black;
+    }
+    .character {
+      background: url('Guest.jpg');
+      background-size: cover;
+      width: 120px;
+      height: 120px;
+      padding: 10px;
+      margin: 10px;
+      float: left;
+      display: none;
+    }
+    .thief {
+      background: url('Thief.jpg');
+      background-size: cover;
+    }
+    .hidden {
+      display: none;
+    }
+    .visible {
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Game Title -->
+  <h2>Smack The Thief by Ayden Piyasiri</h2>
+
+  <!-- How to Play Section -->
+  <div id="instructions">
+    <h3>How to Play</h3>
+    <ul>
+      <li>Click the <strong>Play</strong> button to start the game.</li>
+      <li>Each round, several characters will appear.</li>
+      <li>One of them is a <strong>thief</strong> – find and click the thief!</li>
+      <li>Clicking the thief gives you <strong>+1 point</strong>.</li>
+      <li>Clicking anyone else loses you <strong>2 points</strong>.</li>
+      <li>You have 33 seconds per round, so try to score as high as possible!</l>
+      <li>GOOD LUCK!!!!!!</li>
+    </ul>
+  </div>
+
+  <!-- Play Button -->
+  <input
+    type="button"
+    value="Play"
+    onclick="startGame()"
+    style="font-size: 24px; padding: 15px 30px; border-radius: 10px; background-color: #4CAF50; color: white; border: none; cursor: pointer;"
+  />
+
+  <!-- Game Board -->
+  <div id="board">
+    <div class="character">1</div>
+    <div class="character">2</div>
+    <div class="character">3</div>
+    <div class="character">4</div>
+    <div class="character">5</div>
+    <div class="character">6</div>
+  </div>
+
+  <!-- Game Script -->
+  <script>
+    let loops = 0;
+    let peopleVisible = false;
+    let gameScore = 0;
+    let gameInterval = null;
+    const maxLoops = 12; // 33 seconds = 12 intervals (3s visible + 1s hidden)
+    let roundActive = false;
+    let clickedThisRound = false;
+
+    window.onload = function () {
+      const board = document.getElementById("board");
+      const characters = board.children;
+
+      // Add click listeners once
+      for (let i = 0; i < characters.length; i++) {
+        characters[i].addEventListener("click", function () {
+          if (!roundActive || !this.classList.contains("visible") || clickedThisRound) return;
+
+          clickedThisRound = true;
+
+          if (this.classList.contains("thief")) {
+            gameScore++;
+          } else {
+            gameScore -= 2;
+          }
+
+          roundActive = false;
+        });
+      }
+    };
+
+    function startGame() {
+      resetGameState();
+      runRound();
+    }
+
+    function resetGameState() {
+      loops = 0;
+      gameScore = 0;
+      clearBoard();
+    }
+
+    function runRound() {
+      gameInterval = setInterval(() => {
+        peopleVisible = !peopleVisible;
+        createCharacters();
+        loops++;
+
+        if (loops >= maxLoops) {
+          clearInterval(gameInterval);
+          endRound();
+        }
+      }, peopleVisible ? 2250 : 2250); // alternate show/hide timing
+    }
+
+    function endRound() {
+      clearBoard();
+      alert("You scored " + gameScore);
+
+      if (confirm("Play again?")) {
+        resetGameState();
+        runRound();
+      }
+    }
+
+    function clearBoard() {
+      const board = document.getElementById("board");
+      const characters = board.children;
+      for (let i = 0; i < characters.length; i++) {
+        characters[i].className = "character hidden";
+      }
+    }
+
+    function createCharacters() {
+      const board = document.getElementById("board");
+      const characters = board.children;
+
+      for (let i = 0; i < characters.length; i++) {
+        characters[i].className = peopleVisible ? "character visible" : "character hidden";
+        characters[i].classList.remove("thief");
+      }
+
+      if (peopleVisible) {
+        const thiefIndex = Math.floor(Math.random() * 6);
+        characters[thiefIndex].classList.add("thief");
+
+        roundActive = true;
+        clickedThisRound = false;
+      } else {
+        roundActive = false;
+    }
+}   
+  </script>
+</body>
+</html>
